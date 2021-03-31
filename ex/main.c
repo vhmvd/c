@@ -3,17 +3,17 @@
 struct Node
 {
   int data;
-  Node* next;
+  struct Node* next;
 };
 
-void PrintReverseEven(Node *ptr);
+void PrintReverseEven(struct Node *ptr);
 
 int main()
 {
   return 0;
 }
 
-void PrintReverseEven(Node *ptr) 
+void PrintReverseEven(struct Node *ptr) 
 {
   if(ptr->next != NULL)
   {
