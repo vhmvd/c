@@ -2,8 +2,249 @@
 #include <string.h>
 #include <stdlib.h>
 
+typedef char HEADERS[5][10];
+
+struct StudentRecord
+{
+  long sid;
+  char email[30];
+  char lname[20];
+  char fname[20];
+  float cgpa;
+  struct StudentRecord *next;
+};
+
+void freeRecursion(struct StudentRecord *ptr);
+
 int main(int argc, char *argv[])
 {
-  
+  HEADERS csvHeader = {'\0'};
+  FILE *inFile;
+  FILE *outFile = NULL;
+
+  if (argc != 3)
+  {
+    printf("Usage ./topcgpas <sourcecsv> <outputcsv>\n");
+    return 1;
+  }
+
+  inFile = fopen(argv[1], "r");
+  if (inFile == NULL)
+  {
+    printf("Error! Unable to open the input file %s\n", argv[1]);
+    return 1;
+  }
+
+  int len = strlen(argv[2]);
+  if (len <= 4)
+  {
+    printf("Error! Invlid output CSV file %s name\n", argv[2]);
+    return 1;
+  }
+  else if (argv[2][len - 1] != 'v' || argv[2][len - 2] != 's' || argv[2][len - 3] != 'c' || argv[2][len - 4] != '.')
+  {
+    printf("Error! Invlid output CSV file %s name\n", argv[2]);
+    return 1;
+  }
+  else
+  {
+  }
+
+  if (inFile != 0)
+  {
+    int rType = fscanf(inFile, " %[^,],%[^,],%[^,],%[^,],%s", csvHeader[0], csvHeader[1], csvHeader[2], csvHeader[3], csvHeader[4]);
+    if (rType == EOF)
+    {
+      printf("Error! Input CSV file %s is empty\n", argv[1]);
+      return 1;
+    }
+    else if (rType != 5)
+    {
+      printf("Error! Input CSV file %s format is incorrect\n", argv[1]);
+      return 1;
+    }
+  }
+
+  struct StudentRecord *head = NULL;
+  struct StudentRecord *tail = NULL;
+  struct StudentRecord *ptr = NULL;
+  struct StudentRecord *temp = NULL;
+  long sid;
+  char email[30];
+  char lname[20];
+  char fname[20];
+  float cgpa;
+  while (fscanf(inFile, "%ld,%[^,],%[^,],%[^,],%f", &sid, email, lname, fname, &cgpa) != EOF)
+  {
+    if (head == NULL)
+    {
+      head = (struct StudentRecord *)malloc(sizeof(struct StudentRecord));
+      if (head == NULL)
+      {
+        printf("Error! Program ran out of memory.\n");
+        return 1;
+      }
+      head->cgpa = cgpa;
+      head->sid = sid;
+      strcpy(head->email, email);
+      strcpy(head->lname, lname);
+      strcpy(head->fname, fname);
+      head->next = NULL;
+    }
+    else if (head->next == NULL)
+    {
+      if (cgpa == head->cgpa || cgpa > head->cgpa)
+      {
+        ptr = head;
+        head = (struct StudentRecord *)malloc(sizeof(struct StudentRecord));
+        if (head == NULL)
+        {
+          printf("Error! Program ran out of memory.\n");
+          return 1;
+        }
+        head->cgpa = cgpa;
+        head->sid = sid;
+        strcpy(head->email, email);
+        strcpy(head->lname, lname);
+        strcpy(head->fname, fname);
+        head->next = ptr;
+        ptr->next = NULL;
+        ptr = NULL;
+      }
+      else
+      {
+        head->next = (struct StudentRecord *)malloc(sizeof(struct StudentRecord));
+        if (head->next == NULL)
+        {
+          printf("Error! Program ran out of memory.\n");
+          freeRecursion(head);
+          return 1;
+        }
+        ptr = head->next;
+        ptr->cgpa = cgpa;
+        ptr->sid = sid;
+        strcpy(ptr->email, email);
+        strcpy(ptr->lname, lname);
+        strcpy(ptr->fname, fname);
+        ptr->next = NULL;
+        ptr = NULL;
+      }
+    }
+    else
+    {
+      if (cgpa == head->cgpa || cgpa > head->cgpa)
+      {
+        ptr = head;
+        head = (struct StudentRecord *)malloc(sizeof(struct StudentRecord));
+        if (head == NULL)
+        {
+          printf("Error! Program ran out of memory.\n");
+          freeRecursion(ptr);
+          return 1;
+        }
+        head->cgpa = cgpa;
+        head->sid = sid;
+        strcpy(head->email, email);
+        strcpy(head->lname, lname);
+        strcpy(head->fname, fname);
+        head->next = ptr;
+        ptr = NULL;
+      }
+      else
+      {
+        temp = head;
+        tail = temp;
+        while (temp != NULL)
+        {
+          if (cgpa == temp->cgpa || cgpa > temp->cgpa)
+          {
+            ptr = tail->next;
+            tail->next = (struct StudentRecord *)malloc(sizeof(struct StudentRecord));
+            if (tail->next == NULL)
+            {
+              printf("Error! Program ran out of memory.\n");
+              freeRecursion(head);
+              return 1;
+            }
+            tail = tail->next;
+            tail->cgpa = cgpa;
+            tail->sid = sid;
+            strcpy(tail->email, email);
+            strcpy(tail->lname, lname);
+            strcpy(tail->fname, fname);
+            tail->next = temp;
+            tail = NULL;
+            break;
+          }
+          else if (temp->next == NULL)
+          {
+            temp->next = (struct StudentRecord *)malloc(sizeof(struct StudentRecord));
+            if (tail->next == NULL)
+            {
+              printf("Error! Program ran out of memory.\n");
+              freeRecursion(head);
+              return 1;
+            }
+            ptr = temp->next;
+            ptr->cgpa = cgpa;
+            ptr->sid = sid;
+            strcpy(ptr->email, email);
+            strcpy(ptr->lname, lname);
+            strcpy(ptr->fname, fname);
+            ptr->next = NULL;
+            ptr = NULL;
+            break;
+          }
+          else
+          {
+            tail = temp;
+            temp = temp->next;
+          }
+        }
+      }
+    }
+  }
+  if (!head)
+  {
+    printf("Error! Input CSV file %s is empty\n", argv[1]);
+    return 1;
+  }
+  else
+  {
+    temp = head->next;
+    int count = 0;
+    cgpa = head->cgpa;
+    outFile = fopen(argv[2], "w");
+    fprintf(outFile, "%s,%s,%s\n", csvHeader[0], csvHeader[1], csvHeader[4]);
+    fprintf(outFile, "%ld,%s,%.1f\n", head->sid, head->email, head->cgpa);
+    while (temp != NULL && count < 4)
+    {
+      fprintf(outFile, "%ld,%s,%.1f\n", temp->sid, temp->email, temp->cgpa);
+      count++;
+      cgpa = temp->cgpa;
+      temp = temp->next;
+      if (count == 4)
+      {
+        if (temp->next != NULL)
+        {
+          if (cgpa == temp->cgpa)
+          {
+            count--;
+          }
+        }
+      }
+    }
+  }
+  freeRecursion(head);
   return 0;
+}
+
+void freeRecursion(struct StudentRecord *ptr)
+{
+  if (ptr == NULL)
+  {
+    return;
+  }
+  freeRecursion(ptr->next);
+  free(ptr);
 }

@@ -1,0 +1,3 @@
+﻿  Source.c
+C:\Users\Ahmn2\Desktop\c\Csv Parse\Source.c(37,1): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+  Csv Parse.vcxproj -> C:\Users\Ahmn2\Desktop\c\Csv Parse\x64\Debug\Csv Parse.exe
