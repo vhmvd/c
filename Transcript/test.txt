@@ -1,0 +1,23 @@
+425107125
+Ahmad Ali
+5
+CSC111
+Computer Programming I
+4
+95
+CSC113
+Computer Programming II
+4
+93
+CSC212
+Data Structures
+3
+85
+CSC227
+Operating Systems
+3
+87
+CSC429
+Computer Security
+3
+91
